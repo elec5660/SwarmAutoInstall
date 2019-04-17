@@ -16,8 +16,8 @@ export RECORD_BAG=0
 export NODE_ID=2
 export CAMERA_ID=25001498
 
-#CAM Type = 0 : Ptgrey
+#CAM Type = 0 : Ptgrey stereo
 #CAM Type = 1 : MYNT
 #CAM Type = 2 : BlueFox
 export CAM_TYPE=2
-export CAM_ID=25001498
+export CAM_ID_0=25001498

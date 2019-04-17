@@ -39,6 +39,7 @@ then
     export START_VO_STUFF=0
     export START_UWB_VICON=0
     export USE_VICON_CTRL=0
+    export START_TOF=0
 
     if [ $SWARM_START_MODE -ge 1 ]
     then
@@ -78,6 +79,40 @@ then
 	    START_UWB_FUSE=0
         START_VO_STUFF=0
         START_CAMERA_SYNC=0
+    fi
+
+    if [ $SWARM_START_MODE -eq 6 ]
+    then
+        echo "Will start Control with VICON odom and disable before"
+        START_CONTROL=1
+        #TMP disabce vicon due to tof is using ttyUSB0 in early stage
+        START_UWB_VICON=1
+        START_DJISDK=1
+        USE_VICON_CTRL=1
+
+        START_CAMERA=1
+        START_UWB_COMM=0
+	    START_UWB_FUSE=0
+        START_VO_STUFF=0
+        START_CAMERA_SYNC=0
+        START_TOF=1
+    fi
+
+
+    if [ $SWARM_START_MODE -eq 7 ]
+    then
+        echo "Will start Control with VICON odom and disable before"
+        START_CONTROL=1
+        START_UWB_VICON=1
+        START_DJISDK=1
+        USE_VICON_CTRL=0
+
+        START_CAMERA=1
+        START_UWB_COMM=0
+	    START_UWB_FUSE=0
+        START_VO_STUFF=0
+        START_CAMERA_SYNC=0
+        START_TOF=1
     fi
 
 
@@ -144,8 +179,17 @@ then
     if [ $CAM_TYPE -eq 2 ]
     then
         echo "Will use bluefox Camera"
-        roslaunch bluefox2 single_node.launch device:=$CAMERA_ID &> $LOG_PATH/log_camera.txt &
+        roslaunch bluefox2 single_node.launch device:=$CAMERA_ID_0 &> $LOG_PATH/log_camera.txt &
+        echo "BLUEFOX_CAMERA:"$! >> $PID_FILE
     fi
+fi
+
+
+if [ $START_TOF -eq 1 ]
+then
+    echo "Start TFMINI!!!"
+    roslaunch tfmini_ros tfmini.launch &> $LOG_PATH/log_tfmini.txt &
+    echo "TFMINI:"$! >> $PID_FILE
 fi
 
 if [ $START_VO_STUFF -eq 1 ]
@@ -168,7 +212,7 @@ fi
 if [ $START_UWB_VICON -eq 1 ]
 then
     echo "Start UWB VO"
-    roslaunch uart_odom uwb_mocap_client.launch &> $LOG_PATH/log_uwb_mocap.txt &
+    roslaunch uart_odom client.launch &> $LOG_PATH/log_uwb_mocap.txt &
 fi
 
 if [ $START_UWB_COMM -eq 1 ]
@@ -195,10 +239,10 @@ then
         echo "drone_pos_ctrl:"$! >> $PID_FILE
     else
         echo "Start drone_commander"
-        roslaunch drone_commander commander.launch &> $LOG_PATH/log_drone_commander.txt &
+        roslaunch drone_commander commander.launch vo_topic:=$USER_VO_TOPIC &> $LOG_PATH/log_drone_commander.txt &
         echo "drone_commander:"$! >> $PID_FILE
         echo "Start position ctrl"
-        roslaunch drone_position_control pos_control.launch &> $LOG_PATH/log_drone_position_ctrl.txt &
+        roslaunch drone_position_control pos_control.launch vo_topic:=$USER_VO_TOPIC &> $LOG_PATH/log_drone_position_ctrl.txt &
         echo "drone_pos_ctrl:"$! >> $PID_FILE
     fi
 fi
