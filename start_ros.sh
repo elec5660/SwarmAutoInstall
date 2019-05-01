@@ -179,7 +179,8 @@ then
     if [ $CAM_TYPE -eq 2 ]
     then
         echo "Will use bluefox Camera"
-        roslaunch bluefox2 single_node.launch device:=$CAMERA_ID_0 &> $LOG_PATH/log_camera.txt &
+        rosrun bluefox2 hardsyc.py
+        roslaunch bluefox2 single_node_sync.launch device:=$CAMERA_ID_0 &> $LOG_PATH/log_camera.txt &
         echo "BLUEFOX_CAMERA:"$! >> $PID_FILE
     fi
 fi
